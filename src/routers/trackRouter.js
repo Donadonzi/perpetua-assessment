@@ -1,41 +1,38 @@
 const express = require("express");
-const axios = require('axios');
-const getNextTrack = require('../utils/helpers')
+const {getFirstTrack, getNextTrack} = require('../utils/helpers')
 
 const router = new express.Router();
 
 
 // Get the first two tracks
 router.get("/api/first-two", async (req, res) => {
-	url = `https://api.musixmatch.com/ws/1.1/track.search?page_size=1&q_lyrics=${req.query.category}&quorum_factor=1&apikey=${process.env.API_KEY_1}`;
-
-	const response = await axios.get(url);
-	const trackList = response.data.message.body.track_list;
 	const tracks = [];
+	const firstTrack = await getFirstTrack(req.query.category);
+	if (firstTrack) {
+		tracks.push(firstTrack);
+	}
 	
-	const firstTrack = response.data.message.body.track_list[0];
-	tracks.push({
-		title: firstTrack.track.track_name,
-		artist: firstTrack.track.artist_name,
-		track_id: firstTrack.track.track_id,
-		url: firstTrack.track.track_share_url,
-	});
+	const secondTrack = await getNextTrack(firstTrack.track_id);
+	if (secondTrack) {
+		tracks.push(secondTrack);
+	}
+	if (tracks) {
+		res.status(200).send(tracks);
+	} else {
+		res.status(404).send({ message: 'No tracks found' });
+	}
 
-	secondTrack = await getNextTrack(firstTrack.track_id);
-	tracks.push(secondTrack)
-
-	res.send(tracks);
 });
 
 // Get next tracks
 router.get('/api/next-track', async (req, res) => {
-	nextTrack = getNextTrack(req.query.track_id);  // frontend provides the previous track_id
+	nextTrack = await getNextTrack(req.query.track_id);  // assuming frontend provides the previous track_id
+	if (nextTrack) {
+		res.status(200).send(nextTrack);
+	} else {
+		res.status(404).send({ message: "No tracks found" });
+	}
 	
-	res.send(nextTrack.data)
 });
 
 module.exports = router;
-
-
-
-				
