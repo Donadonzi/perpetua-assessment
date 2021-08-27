@@ -19,7 +19,7 @@ const getLyrics = async (trackId) => {
 	url = `https://api.musixmatch.com/ws/1.1/track.lyrics.get?&track_id=${trackId}&apikey=${process.env.API_KEY_1}`;
 
 	const response = await axios.get(url);
-	lyricsWordsList = response.data.message.body.lyrics.lyrics_body
+	const lyricsWordsList = response.data.message.body.lyrics.lyrics_body
 		.replace(/(\r\n|\n|\r|[(0-9)]|,|\.)/gm, "")
 		.replace("******* This Lyrics is NOT for Commercial use *******", " ")
 		.split(" ");
@@ -28,10 +28,10 @@ const getLyrics = async (trackId) => {
 
 
 const getRandomWords = (words) => {
-	randomWords = new Set();
+	const randomWords = new Set();
 	let counter = 1;
 	while (randomWords.size < 5) {
-		randomWord = words[Math.floor(Math.random() * words.length)];
+		let randomWord = words[Math.floor(Math.random() * words.length)];
 		randomWords.add(randomWord);
 		counter++;
 		// avoid infinite loop
@@ -44,7 +44,7 @@ const getRandomWords = (words) => {
 
 
 const getFirstTrack = async (query) => {
-	trackList = await callTracksApi(query);
+	const trackList = await callTracksApi(query);
 	const firstTrack = trackList[0];
 	if (firstTrack) {
 		playlist.push(firstTrack.track.track_id);
